@@ -31,13 +31,15 @@ class Module:
 
     def train(self) -> None:
         "Set the mode of this module and all descendent modules to `train`."
-        # TODO: Implement for Task 0.4.
-        raise NotImplementedError('Need to implement for Task 0.4')
+        self.training = True
+        for module in self._modules.values():
+            module.train()
 
     def eval(self) -> None:
         "Set the mode of this module and all descendent modules to `eval`."
-        # TODO: Implement for Task 0.4.
-        raise NotImplementedError('Need to implement for Task 0.4')
+        self.training = False
+        for module in self._modules.values():
+            module.eval()
 
     def named_parameters(self) -> Sequence[Tuple[str, Parameter]]:
         """
@@ -47,13 +49,33 @@ class Module:
         Returns:
             The name and `Parameter` of each ancestor parameter.
         """
-        # TODO: Implement for Task 0.4.
-        raise NotImplementedError('Need to implement for Task 0.4')
+        named_params = []
+        def _collect(module: Module, prefix: str = "") -> None:
+            
+            for name, param in module._parameters.items():
+                full_name = f"{prefix}.{name}" if prefix else name
+                named_params.append((full_name, param))
+
+         
+            for sub_name, sub_module in module._modules.items():
+                sub_prefix = f"{prefix}.{sub_name}" if prefix else sub_name
+                _collect(sub_module, sub_prefix)
+
+        _collect(self)
+        return named_params
+
 
     def parameters(self) -> Sequence[Parameter]:
         "Enumerate over all the parameters of this module and its descendents."
-        # TODO: Implement for Task 0.4.
-        raise NotImplementedError('Need to implement for Task 0.4')
+        queue = [self]
+        params = []
+        while queue:
+            cur = queue.pop(0)
+            params += cur._parameters.values()
+            for module in cur._modules.values():
+                queue.append(module)
+        return params
+
 
     def add_parameter(self, k: str, v: Any) -> Parameter:
         """
